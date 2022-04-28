@@ -38,4 +38,7 @@ app.use('/api/users', require('./routes/userRoutes'))
 
 app.use(errorHandler)
 
+// -----------------------------------------------------------------------
+// Listen to Server on port 3000
+// -----------------------------------------------------------------------
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`))

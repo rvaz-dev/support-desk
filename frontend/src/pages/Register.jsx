@@ -48,6 +48,7 @@ function Register() {
         if (isError) {
             toast.error(message)
         }
+
         // redirect when logged in
         if (isSuccess || user) {
             navigate('/')
@@ -86,7 +87,7 @@ function Register() {
 		<>
 			<section className='heading'>
 				<h1>
-					<FaUser /> Register {user}
+					<FaUser /> Register 
 				</h1>
 				<p>Please create an account</p>
 			</section>
