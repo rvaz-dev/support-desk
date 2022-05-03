@@ -9,6 +9,7 @@ import { useSelector, useDispatch } from 'react-redux'
 // ------------------------------------------------------------------------
 // @icons
 import { FaSignInAlt, FaSignOutAlt, FaUser } from 'react-icons/fa'
+// -----------------------------------------------------------------------
 // @features
 import { logout, reset } from '../features/auth/authSlice'
 

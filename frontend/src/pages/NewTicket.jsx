@@ -1,5 +1,5 @@
 //* -----------------------------------------------------------------------
-//*                             Register
+//*                            New Ticket
 //* -----------------------------------------------------------------------
 //								Imports
 // ------------------------------------------------------------------------
@@ -7,76 +7,58 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-
 import { toast } from 'react-toastify'
-// ------------------------------------------------------------------------
-// @icons
-import { FaSignInAlt } from 'react-icons/fa'
 // ------------------------------------------------------------------------
 // @components
 import Spinner from '../components/Spinner'
+import BackButton from '../components/BackButton'
 // ------------------------------------------------------------------------
-// @features auth
-import { login, reset } from '../features/auth/authSlice'
-
+// @features
+import { createTicket, reset } from '../features/tickets/ticketSlice'
 //* -----------------------------------------------------------------------
 //								Function
 // ------------------------------------------------------------------------
 
-function Login() {
+function NewTicket() {
 	// ---------------------------------------------
 	//              <-- States -->
 	// ---------------------------------------------
-	const [formData, setFormData] = useState({
-		email: '',
-		password: '',
-	})
+	const { user } = useSelector((state) => state.auth)
+	const { isLoading, isError, isSuccess, message } = useSelector(
+		(state) => state.tickets
+	)
 
-	const { name, email, password, password2 } = formData
+	const { name, email } = user
+
+	const [product, setProduct] = useState('iPhone')
+	const [description, setDescription] = useState('')
 
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
-
-
-	const { user, isError, isLoading, isSuccess, message } = useSelector(
-		(state) => state.auth
-	)
-
 	// ---------------------------------------------
 	//              <-- onFunctions -->
 	// ---------------------------------------------
-
 	useEffect(() => {
-        // handle error
-        if (isError) {
-            toast.error(message)
-        }
+		if(isError){
+			toast.error(message)
+		}
 
-        // redirect when logged in
-        if (isSuccess || user) {
-            navigate('/')
-        }
+		if (isSuccess) {
+			dispatch(reset())
+			navigate('/tickets')
+		}
+		
+		dispatch(reset())
+	}, [dispatch, isError, isSuccess, navigate, message])
 
-        // reset state
-        dispatch(reset())
-    }, [isError, isSuccess, user, message, navigate, dispatch])
-
-	const onChange = (e) => {
-		setFormData((prevState) => ({
-			...prevState,
-			[e.target.name]: e.target.value,
-		}))
-	}
 
 	const onSubmit = (e) => {
+		// prevents form default action
 		e.preventDefault()
-
-		const userData = {
-            email,
-            password
-        }
-        dispatch(login(userData))
+		// calls createTicket
+		dispatch(createTicket({ product, description }))
 	}
+
 	// ---------------------------------------------
 	//              <-- return -->
 	// ---------------------------------------------
@@ -86,44 +68,49 @@ function Login() {
 
 	return (
 		<>
+			<BackButton url='/' />
 			<section className='heading'>
-				<h1>
-					<FaSignInAlt /> Login
-				</h1>
-				<p>Please log in to get support</p>
+				<h1>Create New Ticket</h1>
+				<p>Please fill out the form bellow</p>
 			</section>
-
 			<section className='form'>
+				<div className='form-group'>
+					<label htmlFor='name'>Customer Name</label>
+					<input type='text' className='form-control' value={name} disabled />
+				</div>
+				<div className='form-group'>
+					<label htmlFor='name'>Customer Email</label>
+					<input type='text' className='form-control' value={email} disabled />
+				</div>
+
 				<form onSubmit={onSubmit}>
-					{/* Email */}
 					<div className='form-group'>
-						<input
-							type='email'
-							id='email'
-							className='form-control'
-							name='email'
-							value={email}
-							onChange={onChange}
-							placeholder='Enter your email'
-							required
-						/>
+						<label htmlFor='product'>Product</label>
+						<select
+							name='product'
+							id='product'
+							value={product}
+							onChange={(e) => setProduct(e.target.value)}
+						>
+							<option value='iPhone'>iPhone</option>
+							<option value='Macbook Pro'>Macbook Pro</option>
+							<option value='iMac'>iMac</option>
+							<option value='iPad'>iPad</option>
+						</select>
 					</div>
-					{/* Password */}
 					<div className='form-group'>
-						<input
-							type='password'
-							id='password'
+						<label htmlFor='description'>Description of the issue</label>
+						<textarea
+							name='description'
+							id='description'
 							className='form-control'
-							name='password'
-							value={password}
-							onChange={onChange}
-							placeholder='Enter your password'
-							required
-						/>
+							placeholder='Description'
+							value={description}
+							onChange={(e) => setDescription(e.target.value)}
+						></textarea>
 					</div>
-					{/* Submit Buttom */}
 					<div className='form-group'>
-						<button className='btn btn-block'>Login</button>
+						<button className='btn btn-block'>Submit</button>
 					</div>
 				</form>
 			</section>
@@ -134,6 +121,6 @@ function Login() {
 //								Export
 // ------------------------------------------------------------------------
 
-export default Login
+export default NewTicket
 
 //* -----------------------------------------------------------------------

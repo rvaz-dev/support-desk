@@ -10,37 +10,34 @@ const router = express.Router()
 // -----------------------------------------------------------------------
 // @controller
 // -----------------------------------------------------------------------
-const { registerUser, loginUser, getMe } = require('../controllers/userController')
+const {
+	getTickets,
+	getTicket,
+	createTicket,
+	deleteTicket,
+	updateTicket,
+} = require('../controllers/ticketController')
+// -----------------------------------------------------------------------
+// @re-route into note router
+const noteRouter = require('./noteRoutes')
+router.use('/:ticketId/notes', noteRouter)
+
 // -----------------------------------------------------------------------
 // @middleware
 // -----------------------------------------------------------------------
 const { protect } = require('../middleware/authMiddleware')
-
 //* -----------------------------------------------------------------------
 
-// @desc    Register a new user
-// @route   /api/users
+// @desc    Get Tickets | Create Tickets | getTicket
+// @route   /api/tickets
 // @access  Public
 // -----------------------------------------------------------------------
-router.post('/', registerUser)
-
-//* -----------------------------------------------------------------------
-
-// @desc    Login a new user
-// @route   /api/users/login
-// @access  Public
-// -----------------------------------------------------------------------
-router.post('/login', loginUser)
-
-//* -----------------------------------------------------------------------
-
-// @desc    Get current User
-// @route   /api/users/me
-// @access  Private
-// -----------------------------------------------------------------------
-router.get('/me', protect, getMe)
-
-
+router.route('/').get(protect, getTickets).post(protect, createTicket)
+router
+	.route('/:id')
+	.get(protect, getTicket)
+	.delete(protect, deleteTicket)
+	.put(protect, updateTicket)
 
 //* ----------------------------------------------------------------------
 // Export

@@ -13,6 +13,9 @@ import { toast } from 'react-toastify'
 // @icons
 import { FaUser } from 'react-icons/fa'
 // ------------------------------------------------------------------------
+// @components
+import Spinner from '../components/Spinner'
+// ------------------------------------------------------------------------
 // @features auth
 import { register, reset } from '../features/auth/authSlice'
 
@@ -83,6 +86,11 @@ function Register() {
 	// ---------------------------------------------
 	//              <-- return -->
 	// ---------------------------------------------
+
+	if (isLoading) {
+		return <Spinner />
+	}
+
 	return (
 		<>
 			<section className='heading'>

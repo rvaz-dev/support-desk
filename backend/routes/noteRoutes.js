@@ -6,41 +6,22 @@
 // @server
 // -----------------------------------------------------------------------
 const express = require('express')
-const router = express.Router()
+const router = express.Router({ mergeParams: true })
 // -----------------------------------------------------------------------
 // @controller
 // -----------------------------------------------------------------------
-const { registerUser, loginUser, getMe } = require('../controllers/userController')
+const { getNotes, addNote } = require('../controllers/noteController')
 // -----------------------------------------------------------------------
 // @middleware
 // -----------------------------------------------------------------------
 const { protect } = require('../middleware/authMiddleware')
-
 //* -----------------------------------------------------------------------
 
-// @desc    Register a new user
-// @route   /api/users
+// @desc    Get Tickets | Create Tickets | getTicket
+// @route   /api/tickets
 // @access  Public
 // -----------------------------------------------------------------------
-router.post('/', registerUser)
-
-//* -----------------------------------------------------------------------
-
-// @desc    Login a new user
-// @route   /api/users/login
-// @access  Public
-// -----------------------------------------------------------------------
-router.post('/login', loginUser)
-
-//* -----------------------------------------------------------------------
-
-// @desc    Get current User
-// @route   /api/users/me
-// @access  Private
-// -----------------------------------------------------------------------
-router.get('/me', protect, getMe)
-
-
+router.route('/').get(protect, getNotes).post(protect, addNote)
 
 //* ----------------------------------------------------------------------
 // Export

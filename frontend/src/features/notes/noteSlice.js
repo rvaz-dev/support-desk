@@ -1,5 +1,5 @@
 //* -----------------------------------------------------------------------
-//*                           	Auth Slice
+//*                           Ticket Slice
 //* -----------------------------------------------------------------------
 //								Imports
 // ------------------------------------------------------------------------
@@ -7,29 +7,28 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 // ------------------------------------------------------------------------
 // @services
-import authService from './authService'
+import noteService from './noteService'
 //* -----------------------------------------------------------------------
 //								    Body
 // ------------------------------------------------------------------------
 // @initial state
 // ------------------------------------------------------------------------
-    // get user from localStorage
-const user = JSON.parse(localStorage.getItem('user'))
-
 const initialState = {
-	user: user ? user : null,
+	notes: [],
 	isError: false,
 	isSuccess: false,
-	isLoading: false,
 	message: '',
 }
 
 // ------------------------------------------------------------------------
-// @desc register new user
+// @desc get ticket notes
 // ------------------------------------------------------------------------
-export const register = createAsyncThunk('auth/register', async (user, thunkAPI) => {
+export const getNotes = createAsyncThunk('notes/getAll', async (ticketId, thunkAPI) => {
 	try {
-		return await authService.register(user)
+		// get token
+		const token = thunkAPI.getState().auth.user.token
+		// get ticket
+		return await noteService.getNotes(ticketId, token)
 	} catch (error) {
 		const message =
 			(error.response && error.response.data && error.response.data.message) ||
@@ -41,74 +40,61 @@ export const register = createAsyncThunk('auth/register', async (user, thunkAPI)
 })
 
 // ------------------------------------------------------------------------
-// @desc login user
+// @desc create a ticket note
 // ------------------------------------------------------------------------
-export const login = createAsyncThunk('auth/login', async (user, thunkAPI) => {
-	try {
-		return await authService.login(user)
-	} catch (error) {
-		const message =
-			(error.response && error.response.data && error.response.data.message) ||
-			error.message ||
-			error.toString()
+export const createNote = createAsyncThunk(
+	'notes/create',
+	async ({ noteText, ticketId }, thunkAPI) => {
+		try {
+			const token = thunkAPI.getState().auth.user.token
+			return await noteService.createNote(noteText, ticketId, token)
+		} catch (error) {
+			const message =
+				(error.response && error.response.data && error.response.data.message) ||
+				error.message ||
+				error.toString()
 
-		return thunkAPI.rejectWithValue(message)
+			return thunkAPI.rejectWithValue(message)
+		}
 	}
-})
+)
 
 // ------------------------------------------------------------------------
-// @desc logout user
-// ------------------------------------------------------------------------
-export const logout = createAsyncThunk('auth/logout', async () => {
-	await authService.logout()
-})
-
-// ------------------------------------------------------------------------
-// @auth slilce
-export const authSlice = createSlice({
-	name: 'auth',
+// @note slilce
+export const noteSlice = createSlice({
+	name: 'note',
 	initialState,
 	reducers: {
-		reset: (state) => {
-			state.isError = false
-			state.isSuccess = false
-			state.isLoading = false
-			state.message = ''
-		},
+		reset: (state) => initialState,
 	},
 	extraReducers: (builder) => {
 		builder
-			.addCase(register.pending, (state) => {
+			.addCase(getNotes.pending, (state) => {
 				state.isLoading = true
 			})
-			.addCase(register.fulfilled, (state, action) => {
+			.addCase(getNotes.fulfilled, (state, action) => {
 				state.isLoading = false
 				state.isSuccess = true
-				state.user = action.payload
+				state.notes = action.payload
 			})
-			.addCase(register.rejected, (state, action) => {
+			.addCase(getNotes.rejected, (state, action) => {
 				state.isLoading = false
 				state.isError = true
 				state.message = action.payload
-				state.user = null
 			})
-			.addCase(login.pending, (state) => {
+			.addCase(createNote.pending, (state) => {
 				state.isLoading = true
 			})
-			.addCase(login.fulfilled, (state, action) => {
+			.addCase(createNote.fulfilled, (state, action) => {
 				state.isLoading = false
 				state.isSuccess = true
-				state.user = action.payload
+				state.notes.push(action.payload)
 			})
-			.addCase(login.rejected, (state, action) => {
+			.addCase(createNote.rejected, (state, action) => {
 				state.isLoading = false
 				state.isError = true
 				state.message = action.payload
-				state.user = null
-            })
-            .addCase(logout.fulfilled, (state) => {
-                state.user = null
-            })
+			})
 	},
 })
 
@@ -116,7 +102,7 @@ export const authSlice = createSlice({
 //								Exports
 // ------------------------------------------------------------------------
 
-export const { reset } = authSlice.actions
-export default authSlice.reducer
+export const { reset } = noteSlice.actions
+export default noteSlice.reducer
 
 //* -----------------------------------------------------------------------
